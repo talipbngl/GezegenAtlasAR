@@ -1,0 +1,10 @@
+Gezegen haritaları: Solar System Scope / INOVE
+Kaynak: https://www.solarsystemscope.com/textures/
+Lisans: Creative Commons Attribution 4.0 International (CC BY 4.0)
+https://creativecommons.org/licenses/by/4.0/
+
+Merkür, Venüs atmosferi, Dünya gündüz haritası, Mars, Jüpiter, Satürn,
+Uranüs ve Neptün haritaları 2K sürümlerinden 1024x512 WebP'ye indirgenmiştir.
+Satürn halkasının 2K alfa haritası dairesel 512x512 WebP'ye dönüştürülmüştür.
+Kaynak haritalar NASA ve çeşitli uzay görevlerinin verilerinden türetilmiştir;
+eksik bölgeler kaynağın açıklamasına göre temsili veriler içerebilir.
