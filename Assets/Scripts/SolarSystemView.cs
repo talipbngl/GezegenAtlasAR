@@ -83,6 +83,8 @@ namespace GezegenAtlasi
                 sphere.name = item.Name;
                 sphere.transform.SetParent(transform, false);
                 sphere.transform.localPosition = position;
+                sphere.transform.localRotation = Quaternion.Euler(0f, 0f, i == 6 ? 98f : i == 5 ? 27f : 0f);
+                sphere.GetComponent<MeshFilter>().sharedMesh = PlanetVisuals.SmoothSphere;
 
                 var body = sphere.AddComponent<PlanetBody>();
                 body.Initialize(i, item.Radius * 2f, 7f + i * 1.7f);
@@ -102,11 +104,14 @@ namespace GezegenAtlasi
             sun.transform.SetParent(transform, false);
             sun.transform.localPosition = new Vector3(0f, .045f, 0f);
             sun.transform.localScale = Vector3.one * .09f;
+            sun.GetComponent<MeshFilter>().sharedMesh = PlanetVisuals.SmoothSphere;
             Destroy(sun.GetComponent<Collider>());
             var material = new Material(Shader.Find("Standard"));
-            material.color = new Color(1f, .55f, .14f);
+            material.color = Color.white;
+            material.mainTexture = PlanetVisuals.SunTexture;
             material.EnableKeyword("_EMISSION");
-            material.SetColor("_EmissionColor", new Color(1f, .34f, .045f) * 1.5f);
+            material.SetTexture("_EmissionMap", PlanetVisuals.SunTexture);
+            material.SetColor("_EmissionColor", new Color(1f, .65f, .32f) * .55f);
             sun.GetComponent<Renderer>().sharedMaterial = material;
             _materials.Add(material);
 
@@ -146,7 +151,7 @@ namespace GezegenAtlasi
             var material = new Material(Shader.Find("Standard"));
             material.mainTexture = texture;
             material.color = texture == null ? item.Color : Color.white;
-            material.SetFloat("_Glossiness", index < 4 ? .26f : .47f);
+            material.SetFloat("_Glossiness", index == 2 ? .42f : index < 4 ? .16f : .08f);
             _materials.Add(material);
             return material;
         }
@@ -155,11 +160,10 @@ namespace GezegenAtlasi
         {
             var ring = new GameObject("Satürn halkaları");
             ring.transform.SetParent(planet, false);
-            ring.transform.localRotation = Quaternion.Euler(68f, 0f, 14f);
-            ring.transform.localScale = Vector3.one * 1.9f;
+            ring.transform.localRotation = Quaternion.Euler(15f, 0f, 0f);
             var filter = ring.AddComponent<MeshFilter>();
             var renderer = ring.AddComponent<MeshRenderer>();
-            filter.sharedMesh = PlanetVisuals.RingQuad;
+            filter.sharedMesh = PlanetVisuals.RingMesh;
             var material = new Material(Shader.Find("Sprites/Default"));
             material.mainTexture = PlanetVisuals.RingTexture;
             material.color = Color.white;

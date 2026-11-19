@@ -4,7 +4,8 @@ Lisans: Creative Commons Attribution 4.0 International (CC BY 4.0)
 https://creativecommons.org/licenses/by/4.0/
 
 Merkür, Venüs atmosferi, Dünya gündüz haritası, Mars, Jüpiter, Satürn,
-Uranüs ve Neptün haritaları 2K sürümlerinden 1024x512 WebP'ye indirgenmiştir.
-Satürn halkasının 2K alfa haritası dairesel 512x512 WebP'ye dönüştürülmüştür.
+Uranüs ve Neptün haritaları 2K (2048x1024) kaynak dosyalarıdır.
+Güneş haritası da 2K kaynaktan alınmıştır.
+Satürn halkasının 2K alfa şeridi (2048x125), iki yüzlü halka geometrisine uygulanır.
 Kaynak haritalar NASA ve çeşitli uzay görevlerinin verilerinden türetilmiştir;
 eksik bölgeler kaynağın açıklamasına göre temsili veriler içerebilir.

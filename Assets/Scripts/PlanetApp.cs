@@ -29,6 +29,8 @@ namespace GezegenAtlasi
         private readonly List<RaycastResult> _uiHits = new List<RaycastResult>();
         private AppUI _ui;
         private SolarSystemView _preview;
+        private GameObject _previewHero;
+        private int _previewHeroIndex = -1;
         private PlacedItem _selectedObject;
         private PlacedItem _draggedObject;
         private bool _arMode;
@@ -61,6 +63,7 @@ namespace GezegenAtlasi
             previewCamera.gameObject.SetActive(true);
             _preview = SolarSystemView.Create(transform);
             _preview.Select(_selectedPlanet);
+            ShowPreviewHero(_selectedPlanet);
             _ui = new AppUI(ToggleMode, CenterAll, DeleteSelected, SelectPlanet, UseSystem, CycleOrbitSpeed);
             _ui.SetARMode(false, false);
             _ui.SetStatus("3B ÖNİZLEME");
@@ -136,6 +139,7 @@ namespace GezegenAtlasi
             arRig.SetActive(false);
             previewCamera.gameObject.SetActive(true);
             _preview.gameObject.SetActive(true);
+            if (_previewHero != null) _previewHero.SetActive(!_systemMode);
             _ui.SetARMode(false, false);
             _ui.SetOcclusion("");
             _ui.SetStatus("3B ÖNİZLEME");
@@ -157,14 +161,32 @@ namespace GezegenAtlasi
             _selectedPlanet = index;
             _systemMode = false;
             _preview.Select(index);
+            ShowPreviewHero(index);
             _ui.SetMode(false);
             _ui.SelectPlanet(index);
+        }
+
+        private void ShowPreviewHero(int index)
+        {
+            if (_previewHeroIndex != index || _previewHero == null)
+            {
+                if (_previewHero != null) Destroy(_previewHero);
+                _previewHero = PlanetVisuals.CreatePlanet(index);
+                _previewHero.name = "Yakın gezegen: " + PlanetCatalog.Planets[index].Name;
+                _previewHero.transform.SetParent(previewCamera.transform, false);
+                _previewHero.transform.localPosition = new Vector3(0f, .07f, 1.15f);
+                _previewHero.transform.localRotation = Quaternion.Euler(-8f, 28f, 0f);
+                _previewHero.transform.localScale = Vector3.one * (index == 5 ? 1.25f : 2f);
+                _previewHeroIndex = index;
+            }
+            _previewHero.SetActive(!_arMode && !_systemMode);
         }
 
         private void UseSystem()
         {
             _systemMode = true;
             _selectedObject = null;
+            if (_previewHero != null) _previewHero.SetActive(false);
             _ui.SetMode(true);
             _ui.SetObjectActions(_objects.Count, false);
         }
@@ -184,7 +206,7 @@ namespace GezegenAtlasi
             if (!_arMode || _objects.Count >= 16) return;
             Ray ray = arCamera.ScreenPointToRay(screenPoint);
             Vector3 point = ray.GetPoint(_systemMode ? 1.6f : 1.25f);
-            float radius = _systemMode ? .56f : .10f;
+            float radius = _systemMode ? .56f : .13f;
             foreach (var item in _objects)
                 if (Vector3.Distance(item.root.transform.position, point) < item.radius * item.root.transform.localScale.x + radius + .045f)
                 {
@@ -225,7 +247,11 @@ namespace GezegenAtlasi
             _selectedPlanet = body.Index;
             _preview.Select(_selectedPlanet);
             _ui.SelectPlanet(_selectedPlanet);
-            if (!_arMode) return null;
+            if (!_arMode)
+            {
+                ShowPreviewHero(_selectedPlanet);
+                return null;
+            }
             foreach (var item in _objects)
             {
                 if (!hit.transform.IsChildOf(item.root.transform)) continue;
@@ -274,11 +300,13 @@ namespace GezegenAtlasi
             if (count >= 2)
             {
                 float distance = Vector2.Distance(first.screenPosition, second.screenPosition);
-                var objectToScale = _arMode ? _selectedObject?.root : _preview.gameObject;
+                var objectToScale = _arMode ? _selectedObject?.root :
+                    _systemMode ? _preview.gameObject : _previewHero;
                 if (_lastPinch > 0 && objectToScale != null &&
                     !IsOverUI(first.screenPosition) && !IsOverUI(second.screenPosition))
                 {
-                    float next = Mathf.Clamp(objectToScale.transform.localScale.x * distance / _lastPinch, .5f, 2.25f);
+                    float next = Mathf.Clamp(objectToScale.transform.localScale.x * distance / _lastPinch,
+                        .5f, _arMode ? 2.25f : _systemMode ? 2.25f : 4f);
                     objectToScale.transform.localScale = Vector3.one * next;
                 }
                 _lastPinch = distance;
@@ -303,7 +331,8 @@ namespace GezegenAtlasi
                 if (_arMode && _draggedObject != null)
                     _draggedObject.root.transform.position = arCamera.ScreenPointToRay(point).GetPoint(_dragDistance);
                 else if (!_arMode)
-                    _preview.transform.Rotate(Vector3.up, -(point.x - _lastTouch.x) * .28f, Space.World);
+                    (_systemMode ? _preview.transform : _previewHero.transform)
+                        .Rotate(Vector3.up, -(point.x - _lastTouch.x) * .28f, Space.Self);
                 _lastTouch = point;
             }
         }
@@ -329,12 +358,17 @@ namespace GezegenAtlasi
             }
             if (mouse.leftButton.isPressed && !IsOverUI(point))
             {
-                _preview.transform.Rotate(Vector3.up, -(point.x - _lastTouch.x) * .28f, Space.World);
+                (_systemMode ? _preview.transform : _previewHero.transform)
+                    .Rotate(Vector3.up, -(point.x - _lastTouch.x) * .28f, Space.Self);
                 _lastTouch = point;
             }
             float wheel = mouse.scroll.ReadValue().y;
             if (Mathf.Abs(wheel) > .1f && !IsOverUI(point))
-                _preview.transform.localScale = Vector3.one * Mathf.Clamp(_preview.transform.localScale.x * (1f + wheel * .001f), .5f, 2.25f);
+            {
+                var target = _systemMode ? _preview.transform : _previewHero.transform;
+                target.localScale = Vector3.one * Mathf.Clamp(target.localScale.x * (1f + wheel * .001f),
+                    .5f, _systemMode ? 2.25f : 4f);
+            }
         }
 #endif
     }
